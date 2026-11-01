@@ -209,14 +209,16 @@
       <input id="ladeDatei" type="file" accept=".json,application/json" hidden>
       <p id="sicherungMeldung" role="status"></p>
       <hr>
-      <h3>Automatisch abgleichen (über GitHub)</h3>
-      <p class="blass">Trag auf jedem Gerät denselben GitHub-Token ein (Einstellungen → Developer settings → Personal access tokens, nur Recht "gist" nötig). Der Lernstand wird dann über einen privaten Gist deines GitHub-Kontos abgeglichen.</p>
-      <label for="githubToken">GitHub-Token</label>
-      <input id="githubToken" type="password" autocomplete="off" placeholder="ghp_…">
-      <div class="sicherung-knoepfe">
-        <button id="githubSync" class="zweit" type="button">Jetzt abgleichen</button>
-      </div>
-      <p id="githubMeldung" role="status"></p>
+      <details>
+        <summary>Für Eltern: Geräte automatisch abgleichen</summary>
+        <p class="blass">Einmal pro Gerät einrichten, danach läuft es von selbst: Trag auf jedem Gerät denselben GitHub-Token ein (github.com → Settings → Developer settings → Personal access tokens, nur Recht "gist" nötig). Der Lernstand wird dann automatisch beim Start und nach jeder Runde über einen privaten Gist abgeglichen – ohne Knopfdruck.</p>
+        <label for="githubToken">GitHub-Token</label>
+        <input id="githubToken" type="password" autocomplete="off" placeholder="ghp_…">
+        <div class="sicherung-knoepfe">
+          <button id="githubSync" class="zweit" type="button">Jetzt testen</button>
+        </div>
+        <p id="githubMeldung" role="status"></p>
+      </details>
       <hr>
       <button id="zuruecksetzen" class="gefahr" type="button">Fortschritt zurücksetzen …</button>
     </div>

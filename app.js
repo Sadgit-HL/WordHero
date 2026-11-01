@@ -1045,6 +1045,7 @@ function waehleOption(nummer) {
 
 // ---------- 13) Auswertung am Ende ----------
 function zeigeEnde() {
+  if (localStorage.getItem(GITHUB_TOKEN_SCHLUESSEL)) githubAbgleichen(true);
   zeigeBereich("ende");
   balken.style.width = "100%";
   infoFeld.textContent = "Runde beendet";
@@ -1327,9 +1328,16 @@ async function githubGistSpeichern(token, gistId, inhalt) {
   });
 }
 
-async function githubAbgleichen() {
+let githubSynchronisiertGerade = false;
+
+async function githubAbgleichen(leise) {
   const token = githubTokenFeld.value.trim();
-  if (!token) { githubMeldung.textContent = "Bitte zuerst einen GitHub-Token eintragen."; return; }
+  if (!token) {
+    if (!leise) githubMeldung.textContent = "Bitte zuerst einen GitHub-Token eintragen.";
+    return;
+  }
+  if (githubSynchronisiertGerade) return;   // nicht zwei Abgleiche gleichzeitig
+  githubSynchronisiertGerade = true;
   localStorage.setItem(GITHUB_TOKEN_SCHLUESSEL, token);
   githubSyncKnopf.disabled = true;
   githubMeldung.textContent = "Gleiche ab …";
@@ -1356,13 +1364,21 @@ async function githubAbgleichen() {
     await githubGistSpeichern(token, gist.id, sicherungsText());
     githubMeldung.textContent = "Abgeglichen" + (uebernommen ? " (" + uebernommen + " Wörter vom anderen Gerät übernommen)" : "") + ".";
   } catch (fehler) {
-    githubMeldung.textContent = "Abgleich fehlgeschlagen: " + fehler.message;
+    if (!leise) githubMeldung.textContent = "Abgleich fehlgeschlagen: " + fehler.message;
   } finally {
     githubSyncKnopf.disabled = false;
+    githubSynchronisiertGerade = false;
   }
 }
 
-githubSyncKnopf.addEventListener("click", githubAbgleichen);
+githubSyncKnopf.addEventListener("click", function () { githubAbgleichen(false); });
+
+// Automatisch abgleichen: beim Start der Seite (damit man den Stand vom anderen
+// Gerät gleich mitbekommt) und nach jeder beendeten Runde (damit der neue Stand
+// hochgeladen wird). Läuft im Hintergrund, ohne dass man etwas tun muss.
+if (localStorage.getItem(GITHUB_TOKEN_SCHLUESSEL)) {
+  githubAbgleichen(true);
+}
 
 abbrechenKnopf.addEventListener("click", function () {
   if (position === 0 && !umgedreht) { zeigeAuswahl(); return; }       // noch nichts gemacht: ohne Rückfrage
