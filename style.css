@@ -1,0 +1,527 @@
+/* ==========================================================
+   WordHero – Aussehen
+   Alle Farben stehen hier oben. Wer das Aussehen ändern will,
+   ändert nur diese Zeilen (probiert zum Beispiel --akzent aus).
+   ========================================================== */
+:root {
+  --hintergrund: #f2f1fb;
+  --karte: #ffffff;
+  --text: #1c1a3a;
+  --blass: #6a6887;
+  --akzent: #5b4bdb;          /* Indigo: Knöpfe, Auswahl */
+  --akzent-text: #ffffff;
+  --gold: #ffb703;            /* Held-Momente: Rang, Fortschritt */
+  --gold-text: #3a2a00;
+  --rand: #dedcf0;
+  --gut: #178a4a;             /* richtig / "Gewusst" */
+  --schlecht: #c93a3a;        /* falsch / "Nicht gewusst" */
+  --auf-farbe: #ffffff;       /* Schrift auf grünen und roten Knöpfen */
+  --schatten: 0 1px 2px rgb(40 30 120 / 0.06), 0 6px 20px rgb(40 30 120 / 0.08);
+  --radius: 1.1rem;
+  --bronze: #c8814a;
+  --silber: #a3acbd;
+}
+
+/* Dunkler Modus, wenn das Handy oder der Laptop ihn eingestellt hat */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --hintergrund: #0f0e1f;
+    --karte: #1a1934;
+    --text: #ecebff;
+    --blass: #a3a1c4;
+    --akzent: #8c7fff;
+    --akzent-text: #100e2a;
+    --gold: #ffc83d;
+    --rand: #2e2c52;
+    --gut: #4cc98a;
+    --schlecht: #f08080;
+    --auf-farbe: #0f0e1f;
+    --schatten: 0 1px 2px rgb(0 0 0 / 0.3), 0 6px 20px rgb(0 0 0 / 0.35);
+  }
+}
+
+* { box-sizing: border-box; }
+
+/* Wichtig: "hidden" soll immer gewinnen, auch bei Knöpfen */
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  background: var(--hintergrund);
+  color: var(--text);
+  line-height: 1.4;
+  -webkit-tap-highlight-color: transparent;
+}
+
+main {
+  max-width: 32rem;
+  margin: 0 auto;
+  padding: 1.25rem 1rem calc(2rem + env(safe-area-inset-bottom));
+}
+
+h1, h2 { line-height: 1.15; }
+
+/* ---------- Knöpfe ---------- */
+button {
+  width: 100%;
+  padding: 0.9rem 1rem;      /* groß genug für den Daumen */
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.85rem;
+  background: var(--akzent);
+  color: var(--akzent-text);
+  cursor: pointer;
+  transition: transform 0.08s, filter 0.15s;
+}
+button:hover:not(:disabled) { filter: brightness(1.06); }
+button:active:not(:disabled) { transform: scale(0.98); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+button:focus-visible, select:focus-visible, input:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* Zweite Sorte Knopf: hell, für weniger wichtige Aktionen */
+button.zweit {
+  background: var(--karte);
+  color: var(--text);
+  border: 1px solid var(--rand);
+}
+/* Kleiner Text-Knopf ("Einstellungen", "✕") */
+.text-knopf {
+  width: auto;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  background: none;
+  color: var(--akzent);
+}
+button.gefahr {
+  background: none;
+  color: var(--schlecht);
+  border: 1px solid color-mix(in srgb, var(--schlecht) 50%, transparent);
+}
+button.gefahr-voll { background: var(--schlecht); color: var(--auf-farbe); }
+
+/* ======================================================
+   Startbildschirm
+   ====================================================== */
+.kopf { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.9rem; }
+h1 { font-size: 1.7rem; margin: 0; letter-spacing: -0.02em; }
+h1 span { color: var(--akzent); }
+
+.rang {
+  width: auto;
+  cursor: pointer;
+  border: none;
+  background: var(--gold);
+  color: var(--gold-text);
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 2rem;
+  box-shadow: var(--schatten);
+}
+.rang::after { content: " ›"; }
+
+.heldkarte {
+  background: linear-gradient(135deg, var(--akzent), color-mix(in srgb, var(--akzent) 60%, #000));
+  color: var(--akzent-text);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem 1.1rem;
+  margin-bottom: 0.9rem;
+  box-shadow: var(--schatten);
+}
+@media (prefers-color-scheme: dark) {
+  .heldkarte { background: linear-gradient(135deg, #3b3282, #2a2466); color: #ecebff; }
+}
+.heldkarte p { margin: 0 0 0.6rem; font-weight: 700; font-size: 1.1rem; }
+.heldkarte #rangZusatz { margin: 0.6rem 0 0; font-weight: 500; font-size: 0.9rem; opacity: 0.9; }
+.mini-balken { height: 0.6rem; background: rgb(255 255 255 / 0.25); border-radius: 1rem; overflow: hidden; }
+#rangBalken { height: 100%; width: 0; background: var(--gold); border-radius: 1rem; transition: width 0.6s ease; }
+
+/* Die Zeile "Was üben?" */
+.auswahlzeile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: left;
+  background: var(--karte);
+  color: var(--text);
+  border: 1px solid var(--rand);
+  box-shadow: var(--schatten);
+  font-weight: 500;
+  margin-bottom: 0.9rem;
+}
+.auswahl-label { color: var(--blass); font-size: 0.85rem; flex: none; }
+.auswahl-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.pfeil { color: var(--akzent); font-size: 1.4rem; line-height: 1; }
+
+/* Stand der Auswahl */
+#stand { margin: 0 0 0.9rem; }
+#zusammenfassung { color: var(--blass); font-size: 0.9rem; margin: 0 0 0.5rem; }
+#uebersicht { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.4rem; }
+.fach {
+  background: var(--karte);
+  border: 1px solid var(--rand);
+  border-radius: 0.7rem;
+  padding: 0.4rem 0.2rem;
+  text-align: center;
+}
+.fach .zahl { display: block; font-size: 1.15rem; font-weight: 700; }
+.fach .name { display: block; font-size: 0.7rem; color: var(--blass); }
+.fach.neu .zahl { color: var(--akzent); }
+
+/* Drei Kacheln für die Übungsart */
+.kacheln { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; margin-bottom: 1rem; }
+.kachel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.8rem 0.4rem;
+  background: var(--karte);
+  color: var(--text);
+  border: 2px solid var(--rand);
+  box-shadow: var(--schatten);
+  font-weight: 500;
+}
+.kachel b { font-size: 0.95rem; }
+.kachel small { color: var(--blass); font-size: 0.75rem; font-weight: 400; }
+.kachel svg {
+  width: 1.7rem; height: 1.7rem; margin-bottom: 0.2rem;
+  fill: none; stroke: var(--akzent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+.kachel[aria-pressed="true"] { border-color: var(--akzent); background: color-mix(in srgb, var(--akzent) 12%, var(--karte)); }
+.kachel[aria-pressed="true"] b { color: var(--akzent); }
+
+button.gross { font-size: 1.25rem; padding: 1.1rem 1rem; border-radius: 1rem; box-shadow: 0 6px 18px color-mix(in srgb, var(--akzent) 40%, transparent); }
+
+.fuss { display: flex; justify-content: center; gap: 1rem; margin-top: 1.1rem; }
+#speicherHinweis { color: var(--schlecht); font-size: 0.85rem; margin: 0.75rem 0 0; }
+
+/* ======================================================
+   Lernbildschirm
+   ====================================================== */
+.lernkopf { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem; }
+#abbrechen { flex: none; font-size: 1.1rem; padding: 0.4rem 0.7rem; color: var(--blass); }
+#fortschritt { flex: 1; height: 0.65rem; background: var(--rand); border-radius: 1rem; overflow: hidden; }
+#balken { height: 100%; width: 0; background: var(--gold); border-radius: 1rem; transition: width 0.35s ease; }
+#info { flex: none; margin: 0; color: var(--blass); font-size: 0.85rem; white-space: nowrap; }
+
+.karte {
+  background: var(--karte);
+  border: 1px solid var(--rand);
+  border-radius: var(--radius);
+  box-shadow: var(--schatten);
+  padding: 1.6rem 1.25rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+#karte { cursor: pointer; min-height: 12rem; display: flex; flex-direction: column; justify-content: center; animation: karte-rein 0.25s ease; }
+#herkunft { color: var(--blass); font-size: 0.8rem; margin: 0 0 1rem; }
+#englisch { font-size: 2.1rem; margin: 0; overflow-wrap: anywhere; }
+#englisch.lang { font-size: 1.45rem; }
+#lautschrift { color: var(--blass); margin: 0.3rem 0 0; min-height: 1.4em; }
+
+/* Rückseite */
+#rueckseite { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px dashed var(--rand); animation: einblenden 0.25s ease; }
+#deutsch { font-size: 1.35rem; font-weight: 600; margin: 0 0 0.75rem; color: var(--akzent); }
+#beispiele { list-style: none; padding: 0; margin: 0 0 0.5rem; color: var(--blass); font-size: 0.95rem; }
+#beispiele li { margin-bottom: 0.35rem; }
+#hinweis { color: var(--blass); font-size: 0.85rem; margin: 0; }
+
+/* Knöpfe unten, am Rand klebend */
+.aktionen {
+  position: sticky;
+  bottom: 0;
+  padding: 1.2rem 0 calc(0.75rem + env(safe-area-inset-bottom));
+  background: linear-gradient(to bottom, transparent, var(--hintergrund) 1rem);
+}
+#antworten { display: flex; gap: 0.75rem; }
+#nein { background: var(--schlecht); color: var(--auf-farbe); }
+#ja   { background: var(--gut);      color: var(--auf-farbe); }
+
+/* Eintippen */
+#tippen { display: flex; flex-direction: column; gap: 0.6rem; }
+#eingabe {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  font: inherit;
+  font-size: 1.2rem;
+  border-radius: 0.85rem;
+  border: 2px solid var(--rand);
+  background: var(--karte);
+  color: var(--text);
+}
+#eingabe:focus { border-color: var(--akzent); }
+
+/* Rückmeldung nach der Antwort */
+#urteil { font-size: 1.1rem; font-weight: 700; margin: 0 0 0.75rem; text-align: center; animation: einblenden 0.2s ease; }
+#urteil.gut::before { content: "✓ "; }
+#urteil.schlecht::before { content: "✗ "; }
+#urteil.gut { color: var(--gut); }
+#urteil.schlecht { color: var(--schlecht); }
+#rueckmeldung button { margin-top: 0.5rem; }
+
+/* Multiple Choice */
+#optionen { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 0.4rem; }
+.option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: left;
+  font-weight: 500;
+  background: var(--karte);
+  color: var(--text);
+  border: 2px solid var(--rand);
+  box-shadow: var(--schatten);
+}
+.option .nr {
+  flex: none;
+  width: 1.7rem;
+  height: 1.7rem;
+  line-height: 1.7rem;
+  text-align: center;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  background: var(--hintergrund);
+  color: var(--blass);
+}
+.option:disabled { opacity: 1; cursor: default; }
+.option.richtig { border-color: var(--gut);      background: color-mix(in srgb, var(--gut) 16%, var(--karte)); }
+.option.falsch  { border-color: var(--schlecht); background: color-mix(in srgb, var(--schlecht) 16%, var(--karte)); animation: wackeln 0.3s; }
+.option.richtig::after { content: "✓"; margin-left: auto; color: var(--gut); font-weight: 800; }
+.option.falsch::after  { content: "✗"; margin-left: auto; color: var(--schlecht); font-weight: 800; }
+.option:disabled:not(.richtig):not(.falsch) { opacity: 0.5; }
+
+/* ======================================================
+   Ende einer Runde
+   ====================================================== */
+#ende { position: relative; }
+.ring {
+  --pct: 0;
+  width: 8rem; height: 8rem;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  background: conic-gradient(var(--gold) calc(var(--pct) * 1%), var(--rand) 0);
+}
+.ring span {
+  width: 6.4rem; height: 6.4rem;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--karte);
+  font-size: 1.9rem; font-weight: 800;
+}
+#endeTitel { margin: 0 0 0.3rem; font-size: 1.6rem; }
+#ergebnis { font-size: 1.1rem; margin: 0 0 1rem; color: var(--blass); }
+#rangMeldung { white-space: pre-line; background: var(--gold); color: var(--gold-text); font-weight: 700; border-radius: 0.8rem; padding: 0.6rem 0.8rem; margin: 0 0 1rem; animation: pop 0.5s; }
+#wiederholung { color: var(--blass); font-size: 0.9rem; margin: 0 0 1rem; }
+#fehlerliste { text-align: left; padding-left: 1.2rem; margin: 0 0 1.25rem; color: var(--blass); }
+#fehlerliste:empty { display: none; }
+#ende button { margin-top: 0.6rem; }
+
+/* Konfetti: ein paar bunte Kärtchen, die herunterfallen */
+#konfetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 50; }
+#konfetti i {
+  position: absolute; top: -1rem;
+  width: 0.6rem; height: 0.9rem;
+  border-radius: 2px;
+  animation: fallen linear forwards;
+}
+
+/* ======================================================
+   Modals (<dialog>)
+   ====================================================== */
+dialog {
+  border: none;
+  padding: 0;
+  border-radius: 1.3rem;
+  width: calc(100% - 2rem);
+  max-width: 30rem;
+  max-height: calc(100dvh - 2rem);
+  background: var(--karte);
+  color: var(--text);
+  box-shadow: 0 20px 60px rgb(10 5 50 / 0.45);
+  overflow: hidden;
+}
+dialog[open] { display: flex; flex-direction: column; animation: dlg-rein 0.2s ease; }
+dialog::backdrop { background: rgb(15 10 50 / 0.55); backdrop-filter: blur(2px); }
+
+.dlg-kopf { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1rem 0.5rem 1.25rem; }
+.dlg-kopf h2 { margin: 0; font-size: 1.2rem; }
+.dlg-inhalt { padding: 0.5rem 1.25rem 1rem; overflow-y: auto; }
+.dlg-fuss { display: flex; gap: 0.6rem; padding: 0.75rem 1.25rem calc(1rem + env(safe-area-inset-bottom)); border-top: 1px solid var(--rand); }
+.dlg-fuss button { flex: 1; }
+.dlg-inhalt hr { border: none; border-top: 1px solid var(--rand); margin: 1.2rem 0 1rem; }
+.blass { color: var(--blass); font-size: 0.9rem; margin-top: 0; }
+
+/* Auf dem Handy fährt das Modal von unten hoch */
+@media (max-width: 600px) {
+  dialog { width: 100%; max-width: none; margin: auto 0 0; border-radius: 1.3rem 1.3rem 0 0; max-height: 88dvh; }
+  dialog[open] { animation: dlg-hoch 0.25s ease; }
+}
+
+/* Units in der Auswahl */
+.unit { border: 1px solid var(--rand); border-radius: 1rem; padding: 0.8rem 0.9rem 0.9rem; margin-bottom: 0.7rem; }
+.unit-kopf { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; margin-bottom: 0.6rem; }
+.unit-titel { font-weight: 700; }
+.unit-titel small { color: var(--blass); font-weight: 400; }
+
+/* Die Teile als anklickbare "Chips" */
+.chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.chip { position: relative; }
+.chip input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.chip span {
+  display: block;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--rand);
+  border-radius: 0.7rem;
+  font-size: 0.95rem;
+  background: var(--hintergrund);
+}
+.chip input:checked + span { background: var(--akzent); border-color: var(--akzent); color: var(--akzent-text); font-weight: 600; }
+.chip input:focus-visible + span { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+/* Zeilen in den Einstellungen */
+.zeile { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin: 0.9rem 0; }
+.zeile select {
+  font: inherit;
+  padding: 0.5rem 0.7rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--rand);
+  background: var(--karte);
+  color: var(--text);
+}
+
+/* Sichern / Laden */
+.sicherung-knoepfe { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.sicherung-knoepfe button { flex: 1 1 10rem; }
+#sicherungMeldung { min-height: 1.2em; font-size: 0.9rem; }
+
+/* ======================================================
+   Bewegung (wird bei "weniger Bewegung" abgeschaltet)
+   ====================================================== */
+@keyframes karte-rein { from { opacity: 0; transform: translateY(8px) scale(0.98); } }
+@keyframes einblenden { from { opacity: 0; transform: translateY(-4px); } }
+@keyframes wackeln { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+@keyframes pop { 0% { transform: scale(0.8); opacity: 0; } 60% { transform: scale(1.06); } 100% { transform: scale(1); opacity: 1; } }
+@keyframes fallen { to { transform: translateY(110vh) rotate(540deg); opacity: 0.9; } }
+@keyframes dlg-rein { from { opacity: 0; transform: scale(0.96); } }
+@keyframes dlg-hoch { from { transform: translateY(100%); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* ======================================================
+   Medaillen
+   ====================================================== */
+.medaillen { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.4rem; margin-bottom: 0.9rem; }
+.med {
+  --farbe: var(--rand);
+  text-align: center;
+  background: var(--karte);
+  border: 2px solid var(--farbe);
+  border-radius: 0.9rem;
+  padding: 0.45rem 0.2rem 0.5rem;
+}
+.med::before { content: ""; display: block; width: 1.2rem; height: 1.2rem; margin: 0 auto 0.25rem; border-radius: 50%; background: var(--farbe); }
+.med small { display: block; font-size: 0.7rem; color: var(--blass); }
+.med b { display: block; font-size: 0.85rem; }
+.med.s1 { --farbe: var(--bronze); }
+.med.s2 { --farbe: var(--silber); }
+.med.s3 { --farbe: var(--gold); background: color-mix(in srgb, var(--gold) 14%, var(--karte)); }
+
+.med-pill {
+  flex: none;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.55rem;
+  border-radius: 2rem;
+  background: var(--hintergrund);
+  color: var(--blass);
+  border: 1px solid var(--rand);
+  margin-left: auto;
+}
+.med-pill.s1 { background: var(--bronze); color: #2b1604; border-color: var(--bronze); }
+.med-pill.s2 { background: var(--silber); color: #1c2230; border-color: var(--silber); }
+.med-pill.s3 { background: var(--gold);   color: var(--gold-text); border-color: var(--gold); }
+
+/* ======================================================
+   Rang-Übersicht
+   ====================================================== */
+.raenge-kopf { font-weight: 700; margin: 0.2rem 0 0.4rem; }
+.raenge-liste { list-style: none; margin: 0.8rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.45rem; }
+.rang-zeile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--rand);
+  border-radius: 0.9rem;
+}
+.rang-nr {
+  flex: none;
+  width: 2rem; height: 2rem;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: var(--hintergrund);
+  color: var(--blass);
+  font-weight: 700;
+}
+.rang-text { flex: 1; min-width: 0; }
+.rang-text b { display: block; }
+.rang-text small { color: var(--blass); }
+.rang-status { flex: none; font-size: 0.8rem; font-weight: 600; color: var(--blass); }
+.rang-zeile.erreicht .rang-nr { background: var(--gold); color: var(--gold-text); }
+.rang-zeile.erreicht .rang-status { color: var(--gut); }
+.rang-zeile.aktuell { border: 2px solid var(--gold); background: color-mix(in srgb, var(--gold) 14%, var(--karte)); }
+.rang-zeile.aktuell .rang-nr { background: var(--gold); color: var(--gold-text); }
+.rang-zeile.aktuell .rang-status { color: var(--text); }
+.rang-zeile.offen { opacity: 0.8; }
+
+/* ======================================================
+   Kompakter Start: weniger Höhe, auf breiten Bildschirmen zwei Spalten
+   ====================================================== */
+#start .kopf { margin-bottom: 0.6rem; }
+#start .heldkarte { padding: 0.75rem 1rem 0.8rem; margin-bottom: 0.6rem; }
+#start .heldkarte p { margin-bottom: 0.45rem; }
+#start .heldkarte #rangZusatz { margin-top: 0.45rem; font-size: 0.85rem; }
+#start .medaillen { margin-bottom: 0.6rem; gap: 0.35rem; }
+#start .med { padding: 0.3rem 0.15rem 0.35rem; border-radius: 0.75rem; }
+#start .med::before { width: 0.9rem; height: 0.9rem; margin-bottom: 0.15rem; }
+#start .auswahlzeile { padding: 0.7rem 1rem; margin-bottom: 0.6rem; }
+#start #stand { margin-bottom: 0.6rem; }
+#start #zusammenfassung { font-size: 0.85rem; margin-bottom: 0.35rem; }
+#start .fach { padding: 0.25rem 0.2rem; }
+#start .fach .zahl { font-size: 1.05rem; }
+#start .kacheln { margin-bottom: 0.6rem; gap: 0.5rem; }
+#start .kachel { padding: 0.55rem 0.3rem; }
+#start .kachel svg { width: 1.4rem; height: 1.4rem; margin-bottom: 0.1rem; }
+#start button.gross { padding: 0.9rem 1rem; font-size: 1.15rem; }
+#start .fuss { margin-top: 0.5rem; }
+
+/* Handy: eine Spalte in fester Reihenfolge (die beiden Spalten-Hüllen lösen sich auf) */
+#start { display: flex; flex-direction: column; }
+.spalten, .spalte { display: contents; }
+#start .heldkarte { order: 1; }
+#start #medaillen { order: 2; }
+#start #auswahlOeffnen { order: 3; }
+#start #stand { order: 4; }
+#start #kacheln { order: 5; }
+#start #los { order: 6; }
+#start #speicherHinweis { order: 7; }
+#start .fuss { order: 8; }
+
+/* Breiter Bildschirm: zwei unabhängige Spalten nebeneinander */
+@media (min-width: 800px) {
+  body.start-aktiv main { max-width: 52rem; padding-top: 1rem; }
+  #start { display: block; }
+  .spalten { display: grid; grid-template-columns: 1fr 1fr; column-gap: 1.25rem; align-items: start; }
+  .spalte { display: flex; flex-direction: column; }
+}

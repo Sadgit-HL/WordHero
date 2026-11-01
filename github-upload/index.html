@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#5b4bdb">
+  <meta name="robots" content="noindex, nofollow">
+  <title>WordHero</title>
+  <link rel="stylesheet" href="style.css?v=12">
+</head>
+<body>
+  <main>
+
+    <!-- ===== 1. Startbildschirm: ein großer Knopf, alles andere dahinter ===== -->
+    <section id="start">
+      <header class="kopf">
+        <h1>Word<span>Hero</span></h1>
+        <button id="rang" class="rang" type="button" aria-haspopup="dialog" aria-label="Alle Ränge anzeigen">★ Rookie</button>
+      </header>
+
+      <div class="spalten">
+        <div class="spalte">
+        <!-- Dein Rang: wächst mit deiner Beherrschung in Prozent und geht nie zurück -->
+        <div class="heldkarte">
+          <p id="rangText"></p>
+          <div class="mini-balken"><div id="rangBalken"></div></div>
+          <p id="rangZusatz"></p>
+        </div>
+
+        <!-- Eine Medaille pro Unit (Bronze, Silber, Gold). Einmal erreicht, bleibt sie. -->
+        <div id="medaillen" class="medaillen" aria-label="Medaillen pro Unit"></div>
+
+        <!-- Dein Stand in der Auswahl: wie viele Wörter liegen in welchem Fach? -->
+        <div id="stand" hidden>
+          <p id="zusammenfassung"></p>
+          <div id="uebersicht"></div>
+        </div>
+
+        </div>
+        <div class="spalte">
+        <!-- Was übe ich? Antippen öffnet die Auswahl der Units -->
+        <button id="auswahlOeffnen" class="auswahlzeile" type="button" aria-haspopup="dialog">
+          <span class="auswahl-label">Was üben?</span>
+          <span id="auswahlText" class="auswahl-text"></span>
+          <span class="pfeil" aria-hidden="true">›</span>
+        </button>
+
+        <!-- Übungsart: drei große Kacheln (app.js trägt die Wahl in das versteckte Feld #uebung ein) -->
+        <div id="kacheln" class="kacheln" role="group" aria-label="Übungsart">
+          <button type="button" class="kachel" data-uebung="karten" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M7 10h10M7 14h6"/></svg>
+            <b>Karten</b><small>umdrehen</small>
+          </button>
+          <button type="button" class="kachel" data-uebung="tippen" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="10" rx="3"/><path d="M7 12h.01M11 12h.01M15 12h.01M8 15h8"/></svg>
+            <b>Tippen</b><small>selber schreiben</small>
+          </button>
+          <button type="button" class="kachel" data-uebung="mc" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h.01M5 12h.01M5 17h.01M9 7h10M9 12h10M9 17h10"/></svg>
+            <b>Auswahl</b><small>wird schwerer</small>
+          </button>
+        </div>
+        <select id="uebung" hidden aria-hidden="true" tabindex="-1">
+          <option value="karten">Karteikarten</option>
+          <option value="tippen">Eintippen</option>
+          <option value="mc">Multiple Choice</option>
+        </select>
+
+        <button id="los" class="gross" type="button" disabled>Los geht's</button>
+
+        <p id="speicherHinweis" hidden>Hinweis: Dieser Browser erlaubt kein Speichern. Die App funktioniert, merkt sich aber nichts.</p>
+
+        <nav class="fuss">
+          <button id="einstellungenOeffnen" class="text-knopf" type="button" aria-haspopup="dialog">Einstellungen</button>
+          <button id="sicherungOeffnen" class="text-knopf" type="button" aria-haspopup="dialog">Sichern &amp; Laden</button>
+        </nav>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 2. Lernen: die Karteikarte ===== -->
+    <section id="lernen" hidden>
+      <div class="lernkopf">
+        <button id="abbrechen" class="text-knopf" type="button" aria-label="Runde beenden">✕</button>
+        <div id="fortschritt"><div id="balken"></div></div>
+        <p id="info"></p>
+      </div>
+
+      <section class="karte" id="karte">
+        <p id="herkunft"></p>
+        <h2 id="englisch"></h2>
+        <p id="lautschrift"></p>
+
+        <div id="rueckseite" hidden>
+          <p id="deutsch"></p>
+          <ul id="beispiele"></ul>
+          <p id="hinweis"></p>
+        </div>
+      </section>
+
+      <!-- Nur bei "Multiple Choice": die vier Antworten baut app.js -->
+      <div id="optionen" hidden></div>
+
+      <!-- Die Knöpfe bleiben unten am Bildschirm, wo der Daumen liegt -->
+      <div class="aktionen">
+        <button id="umdrehen" type="button">Umdrehen</button>
+
+        <div id="antworten" hidden>
+          <button id="nein" type="button">Nicht gewusst</button>
+          <button id="ja" type="button">Gewusst</button>
+        </div>
+
+        <!-- Nur bei der Übungsart "Eintippen": Eingabefeld. Enter = prüfen. -->
+        <form id="tippen" hidden autocomplete="off">
+          <input id="eingabe" type="text" autocapitalize="off" autocorrect="off" spellcheck="false"
+                 aria-label="Deine Antwort">
+          <button id="pruefen" type="submit">Prüfen</button>
+          <button id="weissNicht" class="zweit" type="button">Weiß ich nicht</button>
+        </form>
+
+        <!-- Nach dem Prüfen: richtig oder falsch? -->
+        <div id="rueckmeldung" hidden>
+          <p id="urteil"></p>
+          <button id="weiter" type="button">Weiter</button>
+          <button id="doch" class="zweit" type="button" hidden>Ich hatte es richtig</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 3. Ende einer Runde ===== -->
+    <section id="ende" class="karte" hidden>
+      <div id="ring" class="ring"><span id="ringText">0%</span></div>
+      <h2 id="endeTitel">Geschafft!</h2>
+      <p id="ergebnis"></p>
+      <p id="rangMeldung" hidden></p>
+      <p id="wiederholung" hidden>Das war eine Wiederholung. Sie ändert die Fächer nicht.</p>
+      <ul id="fehlerliste"></ul>
+      <button id="nochmal" type="button">Neue Runde</button>
+      <button id="fehlerNochmal" class="zweit" type="button">Nur die Fehler wiederholen</button>
+      <button id="zurAuswahl" class="zweit" type="button">Zum Start</button>
+    </section>
+  </main>
+
+  <div id="konfetti" aria-hidden="true"></div>
+
+  <!-- ===== Modals (eingebautes <dialog>-Element) ===== -->
+
+  <dialog id="dlgAuswahl" aria-labelledby="dlgAuswahlTitel">
+    <div class="dlg-kopf">
+      <h2 id="dlgAuswahlTitel">Was möchtest du üben?</h2>
+      <button class="text-knopf" type="button" data-schliessen aria-label="Schließen">✕</button>
+    </div>
+    <div class="dlg-inhalt">
+      <!-- Die Unit-Blöcke baut app.js aus den Daten und hängt sie hier ein -->
+      <div id="auswahl"></div>
+    </div>
+    <div class="dlg-fuss">
+      <button id="alleUnits" class="zweit" type="button">Alles / nichts</button>
+      <button type="button" data-schliessen>Fertig</button>
+    </div>
+  </dialog>
+
+  <dialog id="dlgEinstellungen" aria-labelledby="dlgEinstellungenTitel">
+    <div class="dlg-kopf">
+      <h2 id="dlgEinstellungenTitel">Einstellungen</h2>
+      <button class="text-knopf" type="button" data-schliessen aria-label="Schließen">✕</button>
+    </div>
+    <div class="dlg-inhalt">
+      <label class="zeile">
+        Richtung
+        <select id="richtung">
+          <option value="en-de">Englisch → Deutsch</option>
+          <option value="de-en">Deutsch → Englisch</option>
+        </select>
+      </label>
+
+      <label class="zeile">
+        Was soll drankommen?
+        <select id="modus">
+          <option value="leitner">Fälliges und Neues</option>
+          <option value="alles">Alles aus der Auswahl</option>
+        </select>
+      </label>
+
+      <label class="zeile">
+        Anzahl Karten
+        <select id="anzahl">
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="alle">alle</option>
+        </select>
+      </label>
+    </div>
+    <div class="dlg-fuss">
+      <button type="button" data-schliessen>Fertig</button>
+    </div>
+  </dialog>
+
+  <dialog id="dlgSicherung" aria-labelledby="dlgSicherungTitel">
+    <div class="dlg-kopf">
+      <h2 id="dlgSicherungTitel">Sichern &amp; Laden</h2>
+      <button class="text-knopf" type="button" data-schliessen aria-label="Schließen">✕</button>
+    </div>
+    <div class="dlg-inhalt">
+      <p class="blass">Handy und Laptop teilen ihren Lernstand nicht von selbst. Mit einer Sicherungsdatei bringst du ihn von einem Gerät aufs andere oder legst ein Backup an.</p>
+      <div class="sicherung-knoepfe">
+        <button id="sichern" class="zweit" type="button">Fortschritt sichern</button>
+        <button id="laden" class="zweit" type="button">Sicherung laden</button>
+      </div>
+      <input id="ladeDatei" type="file" accept=".json,application/json" hidden>
+      <p id="sicherungMeldung" role="status"></p>
+      <hr>
+      <button id="zuruecksetzen" class="gefahr" type="button">Fortschritt zurücksetzen …</button>
+    </div>
+  </dialog>
+
+  <dialog id="dlgRaenge" aria-labelledby="dlgRaengeTitel">
+    <div class="dlg-kopf">
+      <h2 id="dlgRaengeTitel">Alle Ränge</h2>
+      <button class="text-knopf" type="button" data-schliessen aria-label="Schließen">✕</button>
+    </div>
+    <div class="dlg-inhalt">
+      <p id="raengeKopf" class="raenge-kopf"></p>
+      <p class="blass">Die Beherrschung ist der Durchschnitt über alle Wörter: neu = 0 %, Fach 1 = 20 %, Fach 2 = 40 % bis Fach 5 = 100 %. Ein erreichter Rang geht nie wieder verloren.</p>
+      <ol id="raengeListe" class="raenge-liste"></ol>
+    </div>
+    <div class="dlg-fuss">
+      <button type="button" data-schliessen>Schließen</button>
+    </div>
+  </dialog>
+
+  <!-- Eine Rückfrage für alles, was man nicht aus Versehen tun soll -->
+  <dialog id="dlgFrage" aria-labelledby="frageTitel">
+    <div class="dlg-kopf"><h2 id="frageTitel">Sicher?</h2></div>
+    <div class="dlg-inhalt"><p id="frageText"></p></div>
+    <div class="dlg-fuss">
+      <button id="frageNein" class="zweit" type="button" autofocus>Abbrechen</button>
+      <button id="frageJa" class="gefahr-voll" type="button">OK</button>
+    </div>
+  </dialog>
+
+  <script src="vokabeln.js"></script>
+  <script src="app.js?v=12"></script>
+</body>
+</html>
