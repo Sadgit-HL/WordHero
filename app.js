@@ -1270,6 +1270,100 @@ ladeDatei.addEventListener("change", function () {
   leser.readAsText(datei);
 });
 
+// ---------- GitHub-Sync (Gist) ----------
+// Der Fortschritt wird in einem privaten Gist des eigenen GitHub-Kontos abgelegt.
+// So gleichen sich Handy und Laptop automatisch ab, ohne Datei hin- und herzuschicken.
+const GITHUB_TOKEN_SCHLUESSEL = "vokabeltrainer-github-token-v1";
+const GITHUB_GIST_SCHLUESSEL  = "vokabeltrainer-github-gist-v1";
+const GITHUB_GIST_DATEINAME   = "wordhero-fortschritt.json";
+const GITHUB_GIST_BESCHREIBUNG = "WordHero Fortschritt (automatisch, nicht von Hand bearbeiten)";
+
+const githubTokenFeld = document.getElementById("githubToken");
+const githubSyncKnopf = document.getElementById("githubSync");
+const githubMeldung   = document.getElementById("githubMeldung");
+
+githubTokenFeld.value = localStorage.getItem(GITHUB_TOKEN_SCHLUESSEL) || "";
+
+async function githubApi(pfad, token, optionen) {
+  const antwort = await fetch("https://api.github.com" + pfad, Object.assign({
+    headers: {
+      Authorization: "token " + token,
+      Accept: "application/vnd.github+json"
+    }
+  }, optionen));
+  if (!antwort.ok) {
+    const text = await antwort.text().catch(function () { return ""; });
+    throw new Error("GitHub-Fehler " + antwort.status + (text ? ": " + text : ""));
+  }
+  return antwort.json();
+}
+
+async function githubGistFinden(token) {
+  const gespeicherteId = localStorage.getItem(GITHUB_GIST_SCHLUESSEL);
+  if (gespeicherteId) {
+    try { return await githubApi("/gists/" + gespeicherteId, token); } catch (fehler) { /* evtl. gelöscht: neu suchen */ }
+  }
+  const gists = await githubApi("/gists", token);
+  const treffer = gists.find(function (g) { return g.description === GITHUB_GIST_BESCHREIBUNG; });
+  if (treffer) return githubApi("/gists/" + treffer.id, token);
+  return null;
+}
+
+async function githubGistAnlegen(token, inhalt) {
+  const dateien = {};
+  dateien[GITHUB_GIST_DATEINAME] = { content: inhalt };
+  return githubApi("/gists", token, {
+    method: "POST",
+    body: JSON.stringify({ description: GITHUB_GIST_BESCHREIBUNG, public: false, files: dateien })
+  });
+}
+
+async function githubGistSpeichern(token, gistId, inhalt) {
+  const dateien = {};
+  dateien[GITHUB_GIST_DATEINAME] = { content: inhalt };
+  return githubApi("/gists/" + gistId, token, {
+    method: "PATCH",
+    body: JSON.stringify({ files: dateien })
+  });
+}
+
+async function githubAbgleichen() {
+  const token = githubTokenFeld.value.trim();
+  if (!token) { githubMeldung.textContent = "Bitte zuerst einen GitHub-Token eintragen."; return; }
+  localStorage.setItem(GITHUB_TOKEN_SCHLUESSEL, token);
+  githubSyncKnopf.disabled = true;
+  githubMeldung.textContent = "Gleiche ab …";
+  try {
+    let gist = await githubGistFinden(token);
+    if (!gist) gist = await githubGistAnlegen(token, sicherungsText());
+    localStorage.setItem(GITHUB_GIST_SCHLUESSEL, gist.id);
+
+    const datei = gist.files && gist.files[GITHUB_GIST_DATEINAME];
+    let uebernommen = 0;
+    if (datei && datei.content) {
+      const daten = JSON.parse(datei.content);
+      if (daten && typeof daten.fortschritt === "object" && daten.fortschritt !== null) {
+        const r = fuehreZusammen(daten.fortschritt);
+        fuehreRekordZusammen(daten.rekord);
+        uebernommen = r.uebernommen;
+        speichereJson(FORTSCHRITT_SCHLUESSEL, fortschritt);
+        speichereJson(REKORD_SCHLUESSEL, rekord);
+        aktualisiereRekord();
+        auswahlGeaendert();
+      }
+    }
+
+    await githubGistSpeichern(token, gist.id, sicherungsText());
+    githubMeldung.textContent = "Abgeglichen" + (uebernommen ? " (" + uebernommen + " Wörter vom anderen Gerät übernommen)" : "") + ".";
+  } catch (fehler) {
+    githubMeldung.textContent = "Abgleich fehlgeschlagen: " + fehler.message;
+  } finally {
+    githubSyncKnopf.disabled = false;
+  }
+}
+
+githubSyncKnopf.addEventListener("click", githubAbgleichen);
+
 abbrechenKnopf.addEventListener("click", function () {
   if (position === 0 && !umgedreht) { zeigeAuswahl(); return; }       // noch nichts gemacht: ohne Rückfrage
   frage("Runde beenden?", "Deine bisherigen Antworten sind gespeichert. Die aktuelle Karte zählt nicht.", "Beenden")
